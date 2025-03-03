@@ -1,95 +1,93 @@
-// Retrieve entries from local storage, or initialize an empty array if none exist
-var entries = JSON.parse(localStorage.getItem("entries")) || [];
+document.addEventListener("DOMContentLoaded", function () {
+    var transactionForm = document.getElementById("transactionForm");
+    var transactionList = document.getElementById("transactionList");
+    var totalIncome = document.getElementById("totalIncome");
+    var totalExpense = document.getElementById("totalExpense");
+    var balance = document.getElementById("balance");
+    var resetBtn = document.getElementById("resetBtn");
 
-// Main function to add a new entry
-function addEntry() {
-    // Get values from input fields
-    var description = document.getElementById("description").value;
-    var amount = parseFloat(document.getElementById("amount").value);
-    var type = document.querySelector("input[name='type']:checked")?.value;
+    // Load transactions from localStorage
+    var transactions = JSON.parse(localStorage.getItem("transactions")) || [];
 
-    // Check if inputs are valid
-    if (description && !isNaN(amount) && type) {
-        // Add entry to the entries array
-        entries.push({ description: description, amount: amount, type: type });
-        
-        // Save entries to local storage and display them
-        localStorage.setItem("entries", JSON.stringify(entries));
-        displayEntries();
-        
-        // Reset input fields
-        document.getElementById("description").value = "";
-        document.getElementById("amount").value = "";
-        document.querySelector("input[name='type']").checked = false;
-    }
-}
+    // Function to update the UI
+    function updateUI() {
+        transactionList.innerHTML = "";
+        var incomeTotal = 0, expenseTotal = 0;
 
-// Display all entries and calculate totals
-function displayEntries() {
-    var incomeTable = document.getElementById("incomeEntries");
-    var expenseTable = document.getElementById("expenseEntries");
-    
-    // Clear existing entries in both tables
-    incomeTable.innerHTML = "";
-    expenseTable.innerHTML = "";
+        var selectedFilter = document.querySelector('input[name="filter"]:checked').value;
 
-    var totalIncome = 0;
-    var totalExpense = 0;
+        // Loop through transactions and display them
+        transactions.forEach(function (transaction, index) {
+            if (selectedFilter !== "all" && transaction.type !== selectedFilter) return;
 
-    // Loop through all entries and add them to the correct table
-    for (var i = 0; i < entries.length; i++) {
-        var entry = entries[i];
-        
-        // Create a row for each entry
-        var row = `<tr>
-            <td class="p-2 border">${entry.description}</td>
-            <td class="p-2 border">₹${entry.amount.toFixed(2)}</td>
-            <td class="p-2 border">
-                <button onclick="editEntry(${i})" class="text-blue-500">Edit</button>
-                <button onclick="deleteEntry(${i})" class="text-red-500">Delete</button>
-            </td>
-        </tr>`;
+            var li = document.createElement("li");
+            li.className = "flex justify-between p-2 border rounded bg-gray-100";
+            li.innerHTML = `
+                <span>${transaction.description} - ₹${transaction.amount}</span>
+                <div>
+                    <button onclick="editTransaction(${index})" class="text-yellow-500 mr-2">Edit</button>
+                    <button onclick="deleteTransaction(${index})" class="text-red-500">Delete</button>
+                </div>
+            `;
+            transactionList.appendChild(li);
 
-        // Add income or expense to the correct table and calculate totals
-        if (entry.type === "income") {
-            incomeTable.innerHTML += row;
-            totalIncome += entry.amount;
-        } else if (entry.type === "expense") {
-            expenseTable.innerHTML += row;
-            totalExpense += entry.amount;
-        }
+            // Calculate total income and expenses
+            if (transaction.type === "income") incomeTotal += transaction.amount;
+            else expenseTotal += transaction.amount;
+        });
+
+        // Update total income, expense, and balance
+        totalIncome.textContent = incomeTotal;
+        totalExpense.textContent = expenseTotal;
+        balance.textContent = incomeTotal - expenseTotal;
+
+        // Save updated transactions to localStorage
+        localStorage.setItem("transactions", JSON.stringify(transactions));
     }
 
-    // Update totals in the totals table
-    document.getElementById("totalIncome").innerText = "₹" + totalIncome.toFixed(2);
-    document.getElementById("totalExpense").innerText = "₹" + totalExpense.toFixed(2);
-    document.getElementById("netBalance").innerText = "₹" + (totalIncome - totalExpense).toFixed(2);
-}
+    // Function to handle form submission (Adding a transaction)
+    transactionForm.addEventListener("submit", function (event) {
+        event.preventDefault();
 
-// Function to edit an entry
-function editEntry(index) {
-    // Load entry data into input fields for editing
-    var entry = entries[index];
-    document.getElementById("description").value = entry.description;
-    document.getElementById("amount").value = entry.amount;
-    document.querySelector(`input[name='type'][value='${entry.type}']`).checked = true;
+        var description = document.getElementById("description").value.trim();
+        var amount = parseFloat(document.getElementById("amount").value);
+        var type = document.getElementById("type").value;
 
-    // Remove the entry so it can be replaced with the edited version
-    entries.splice(index, 1);
-    localStorage.setItem("entries", JSON.stringify(entries));
-    displayEntries();
-}
+        if (description === "" || isNaN(amount) || amount <= 0) return;
 
-// Function to delete an entry
-function deleteEntry(index) {
-    // Remove the selected entry and update local storage and display
-    entries.splice(index, 1);
-    localStorage.setItem("entries", JSON.stringify(entries));
-    displayEntries();
-}
+        // Add new transaction
+        transactions.push({ description: description, amount: amount, type: type });
+        transactionForm.reset();
+        updateUI();
+    });
 
-// Initialize the display when the page loads
-displayEntries();
+    // Delete transaction
+    window.deleteTransaction = function (index) {
+        transactions.splice(index, 1);
+        updateUI();
+    };
 
-// Event listener for the add button
-document.getElementById("addBtn").addEventListener("click", addEntry);
+    // Edit transaction
+    window.editTransaction = function (index) {
+        var transaction = transactions[index];
+        document.getElementById("description").value = transaction.description;
+        document.getElementById("amount").value = transaction.amount;
+        document.getElementById("type").value = transaction.type;
+        transactions.splice(index, 1);
+        updateUI();
+    };
+
+    // Reset button to clear input fields
+    resetBtn.addEventListener("click", function () {
+        transactionForm.reset();
+    });
+
+    // Filter functionality
+    document.querySelectorAll('input[name="filter"]').forEach(function (radio) {
+        radio.addEventListener("change", updateUI);
+    });
+
+    // Initial UI update on page load
+    updateUI();
+});
+

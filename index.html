@@ -4,84 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Income Expense Calculator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="script.js" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gradient-to-r from-emerald-400 to-cyan-400 p-4">
-    <div class="max-w-4xl mx-auto bg-[#E0F7FA] p-6 rounded shadow-md">
-        <h2 class="text-2xl font-bold mb-4 text-center">Income Expense Calculator</h2>
+<body class="bg-gradient-to-r from-blue-400 to-purple-300 min-h-screen flex items-center justify-center">
+    <div class="max-w-2xl w-full mx-auto p-6 bg-white shadow-lg rounded-lg">
+        <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">Income & Expense Calculator</h2>
 
-        <!-- Main Flex Container -->
-        <div class="flex flex-col lg:flex-row lg:space-x-6">
-            <!-- Left Column: Totals and Input Section -->
-            <div class="lg:w-1/2 mb-6 lg:mb-0">
-                <!-- Totals Table -->
-                <table class="w-full mb-4 text-left border">
-                    <thead>
-                        <tr>
-                            <th class="p-2 border">Total Income</th>
-                            <th class="p-2 border">Total Expenses</th>
-                            <th class="p-2 border">Net Balance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td id="totalIncome" class="p-2 border">₹0.00</td>
-                            <td id="totalExpense" class="p-2 border">₹0.00</td>
-                            <td id="netBalance" class="p-2 border">₹0.00</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <!-- Input Section -->
-                <div class="mb-4">
-                    <input id="description" type="text" placeholder="Description" class="w-full p-2 mb-2 border rounded">
-                    <input id="amount" type="number" placeholder="Amount" class="w-full p-2 mb-2 border rounded">
-                    
-                    <div class="flex justify-around mb-2">
-                        <label><input type="radio" name="type" value="income"> Income</label>
-                        <label><input type="radio" name="type" value="expense"> Expense</label>
-                    </div>
-                    
-                    <button id="addBtn" class="w-full p-2 bg-blue-500 text-white rounded">Add Entry</button>
-                    <button id="resetBtn" class="w-full p-2 mt-2 bg-gray-300 text-gray-700 rounded">Reset</button>
-                </div>
-            </div>
-
-            <!-- Right Column: Income and Expense Tables -->
-            <div class="lg:w-1/2">
-                <!-- Income Table -->
-                <h3 class="text-lg font-semibold mb-2">Income Entries</h3>
-                <table class="w-full mb-4 text-left border">
-                    <thead>
-                        <tr>
-                            <th class="p-2 border">Description</th>
-                            <th class="p-2 border">Amount</th>
-                            <th class="p-2 border">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="incomeEntries">
-                        <!-- Income entries will be dynamically inserted here -->
-                    </tbody>
-                </table>
-                
-                <!-- Expense Table -->
-                <h3 class="text-lg font-semibold mb-2">Expense Entries</h3>
-                <table class="w-full text-left border">
-                    <thead>
-                        <tr>
-                            <th class="p-2 border">Description</th>
-                            <th class="p-2 border">Amount</th>
-                            <th class="p-2 border">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="expenseEntries">
-                        <!-- Expense entries will be dynamically inserted here -->
-                    </tbody>
-                </table>
-            </div>
+        <!-- Display Total Income, Expenses & Balance -->
+        <div class="flex justify-between p-4 bg-gray-100 rounded-md mb-4">
+            <div class="text-green-600 font-bold">Income: ₹<span id="totalIncome">0</span></div>
+            <div class="text-red-600 font-bold">Expenses: ₹<span id="totalExpense">0</span></div>
+            <div class="text-blue-600 font-bold">Balance: ₹<span id="balance">0</span></div>
         </div>
-    </div>
 
-    <script src="script.js"></script>
+        <!-- Form to Add Income/Expense -->
+        <form id="transactionForm" class="mb-4">
+            <input type="text" id="description" placeholder="Enter description" class="w-full p-2 border rounded mb-2" required>
+            <input type="number" id="amount" placeholder="Enter amount" class="w-full p-2 border rounded mb-2" required>
+            <select id="type" class="w-full p-2 border rounded mb-2">
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+            </select>
+            <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Add Transaction</button>
+            <button type="button" id="resetBtn" class="w-full bg-gray-400 text-white p-2 rounded mt-2 hover:bg-gray-500">Reset</button>
+        </form>
+
+        <!-- Filters for Transactions -->
+        <div class="flex justify-center space-x-4 mb-4">
+            <label><input type="radio" name="filter" value="all" checked> All</label>
+            <label><input type="radio" name="filter" value="income"> Income</label>
+            <label><input type="radio" name="filter" value="expense"> Expense</label>
+        </div>
+
+        <!-- Transactions List -->
+        <ul id="transactionList" class="space-y-2"></ul>
+    </div>
 </body>
 </html>
+
